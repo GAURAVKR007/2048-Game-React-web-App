@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import Block from './Block'
+// import Block from './Block'
 import cloneDeep from "lodash.clonedeep"
+import { useEvent, getColors } from "./util";
+import Swipe from "react-easy-swipe";
 
 function Game() {
 
@@ -15,6 +17,8 @@ function Game() {
         [0,0,0,0],
         [0,0,0,0],
     ])
+
+    const [gameOver, setGameOver] = useState(false);
 
 
     // Initialize 
@@ -253,6 +257,38 @@ function Game() {
 
     // Check Game Over 
 
+    const checkIfGameOver = () => {
+        console.log("CHECKING GAME OVER");
+        // let original = cloneDeep(data);
+        let checker = swipeLeft(true);
+    
+        if (JSON.stringify(data) !== JSON.stringify(checker)) {
+          return false;
+        }
+    
+        let checker2 = swipeDown(true);
+        console.log("CHECKER DOWN");
+        console.table(data);
+        console.table(checker2);
+        if (JSON.stringify(data) !== JSON.stringify(checker2)) {
+          return false;
+        }
+    
+        let checker3 = swipeRight(true);
+    
+        if (JSON.stringify(data) !== JSON.stringify(checker3)) {
+          return false;
+        }
+    
+        let checker4 = swipeUp(true);
+    
+        if (JSON.stringify(data) !== JSON.stringify(checker4)) {
+          return false;
+        }
+    
+        return true;
+      };
+    
     // Reset
     const resetGame = () => {
         setGameOver(false);
@@ -311,25 +347,177 @@ function Game() {
         initialize();
     },[])
 
-  return (
-    <div>
-        {/* <h1>2048</h1>
-        <hr />
-        <h2>Score : 0</h2> */}
+    // This is a custom function
+    useEvent("keydown", handleKeyDown);
 
-        <div className='board'>
-            {data.map((row, oneIndex) => {
-                return (
-                    <div style={{display: "flex"}}>
-                        {row.map((digit, index) => (
-                            <Block num={digit} key={index} />
-                        ))}
+    return (
+        <div className="App">
+          <div
+            style={{
+              width: 345,
+              margin: "auto",
+              marginTop: 30,
+            }}
+          >
+            <div style={{ display: "flex" }}>
+              <div
+                style={{
+                  fontFamily: "sans-serif",
+                  flex: 1,
+                  fontWeight: "700",
+                  fontSize: 60,
+                  color: "#776e65",
+                }}
+              >
+                2048
+              </div>
+              <div
+                style={{
+                  flex: 1,
+                  marginTop: "auto",
+                }}
+              >
+                <div onClick={resetGame} style={style.newGameButton}>
+                  NEW GAME
+                </div>
+              </div>
+            </div>
+            <div
+              style={{
+                background: "#AD9D8F",
+                width: "max-content",
+                height: "max-content",
+                margin: "auto",
+                padding: 5,
+                borderRadius: 5,
+                marginTop: 10,
+                position: "relative",
+              }}
+            >
+              {gameOver && (
+                <div style={style.gameOverOverlay}>
+                  <div>
+                    <div
+                      style={{
+                        fontSize: 30,
+                        fontFamily: "sans-serif",
+                        fontWeight: "900",
+                        color: "#776E65",
+                      }}
+                    >
+                      Game Over
                     </div>
-                )
-            }
-            )}
+                    <div>
+                      <div
+                        style={{
+                          flex: 1,
+                          marginTop: "auto",
+                        }}
+                      >
+                        <div onClick={resetGame} style={style.tryAgainButton}>
+                          Try Again
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <Swipe
+                onSwipeDown={() => {
+                  swipeDown();
+                }}
+                onSwipeLeft={() => swipeLeft()}
+                onSwipeRight={() => swipeRight()}
+                onSwipeUp={() => swipeUp()}
+                style={{ overflowY: "hidden" }}
+              >
+                {data.map((row, oneIndex) => {
+                  return (
+                    <div style={{ display: "flex" }} key={oneIndex}>
+                      {row.map((digit, index) => (
+                        <Block num={digit} key={index} />
+                      ))}
+                    </div>
+                  );
+                })}
+              </Swipe>
+            </div>
+    
+            <div style={{ width: "inherit" }}>
+              <p class="game-explanation">
+                <strong class="important">How to play:</strong> Use your{" "}
+                <strong>arrow keys</strong> to move the tiles. When two tiles with
+                the same number touch, they <strong>merge into one!</strong>
+              </p>
+            </div>
+          </div>
         </div>
-    </div>
-  )
-}
+      );
+    }
+    
+    const Block = ({ num }) => {
+      const { blockStyle } = style;
+    
+      return (
+        <div
+          style={{
+            ...blockStyle,
+            background: getColors(num),
+            color: num === 2 || num === 4 ? "#645B52" : "#F7F4EF",
+          }}
+        >
+          {num !== 0 ? num : ""}
+        </div>
+      );
+    };
+    
+    const style = {
+      blockStyle: {
+        height: 80,
+        width: 80,
+        background: "lightgray",
+        margin: 3,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        fontSize: 45,
+        fontWeight: "800",
+        color: "white",
+      },
+      newGameButton: {
+        padding: 10,
+        background: "#846F5B",
+        color: "#F8F5F0",
+        width: 95,
+        borderRadius: 7,
+        fontWeight: "900",
+        marginLeft: "auto",
+        marginBottom: "auto",
+        cursor: "pointer",
+      },
+      tryAgainButton: {
+        padding: 10,
+        background: "#846F5B",
+        color: "#F8F5F0",
+        width: 80,
+        borderRadius: 7,
+        fontWeight: "900",
+        cursor: "pointer",
+        margin: "auto",
+        marginTop: 20,
+      },
+      gameOverOverlay: {
+        position: "absolute",
+        height: "100%",
+        width: "100%",
+        left: 0,
+        top: 0,
+        borderRadius: 5,
+        background: "rgba(238,228,218,.5)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      },
+    };
+    
 export default Game
