@@ -3,6 +3,12 @@ import Block from './Block'
 import cloneDeep from "lodash.clonedeep"
 
 function Game() {
+
+    const UP_ARROW = 38;
+    const DOWN_ARROW = 40;
+    const LEFT_ARROW = 37;
+    const RIGHT_ARROW = 39;
+
     const [data , setData] = useState([
         [0,0,0,0],
         [0,0,0,0],
@@ -248,9 +254,57 @@ function Game() {
     // Check Game Over 
 
     // Reset
-
+    const resetGame = () => {
+        setGameOver(false);
+        const emptyGrid = [
+          [0, 0, 0, 0],
+          [0, 0, 0, 0],
+          [0, 0, 0, 0],
+          [0, 0, 0, 0],
+        ];
+    
+        addNumber(emptyGrid);
+        addNumber(emptyGrid);
+        setData(emptyGrid);
+      };
 
     // Handle Key Down
+
+    const handleKeyDown = (event) => {
+        if (gameOver) {
+          return;
+        }
+        switch (event.keyCode) {
+          case UP_ARROW:
+            // alert("up");
+            // console.table(data);
+            swipeUp();
+            // console.table(data);
+            break;
+          case DOWN_ARROW:
+            // console.table(data);
+            swipeDown();
+            // console.table(data);
+            break;
+          case LEFT_ARROW:
+            // console.table(data);
+            swipeLeft();
+            // console.table(data);
+            break;
+          case RIGHT_ARROW:
+            // console.table(data);
+            swipeRight();
+            // console.table(data);
+            break;
+          default:
+            break;
+        }
+    
+        let gameOverr = checkIfGameOver();
+        if (gameOverr) {
+          setGameOver(true);
+        }
+      };
 
 
     useEffect(()=> {
